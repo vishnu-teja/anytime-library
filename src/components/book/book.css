@@ -1,6 +1,15 @@
 .Card {
-  max-width: 345;
+  max-width: 250px;
+  height: 450px;
 }
 .Media {
-  height: 140;
+  height: 300px;
+}
+
+.Book {
+  display: none;
+}
+
+.Typography {
+  font-size: 1rem;
 }

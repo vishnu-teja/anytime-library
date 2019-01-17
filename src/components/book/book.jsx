@@ -16,8 +16,6 @@ class Book extends Component {
     this.props.delete(isbn);
   };
   render() {
-    console.log(this.props.book);
-
     return (
       <div>
         <Card className={classes.Card}>
@@ -25,14 +23,17 @@ class Book extends Component {
             <CardMedia
               className={classes.Media}
               image={this.props.book.largeImage}
-              title={this.props.book.title}
+              // title={this.props.book.title}
             />
             <CardContent>
-              <Typography gutterBottom variant="h5" component="h2">
-                {this.props.book.title}
+              <Typography gutterBottom variant="h5" component="h3">
+                <div className={classes.Typography}>
+                  {this.props.book.title}
+                </div>
               </Typography>
               <Typography component="p">
-                {this.props.book.description}
+                {/*{this.props.book.description} */}
+                Average Rating: {this.props.book.rating}
               </Typography>
             </CardContent>
           </CardActionArea>
@@ -43,7 +44,7 @@ class Book extends Component {
             <Button
               size="small"
               color="primary"
-              onClick={() => this.deleteBookHandler(this.props.book.isbn)}
+              onClick={() => this.deleteBookHandler(this.props.id)}
             >
               Delete
             </Button>

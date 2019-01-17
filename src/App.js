@@ -1,29 +1,27 @@
 import React, { Component } from 'react';
-import axios from 'axios';
-import classes from './App.css';
-import AdminHome from './components/admin/admin-home/admin-home';
+// import Grid from '@material-ui/core/Grid';
+import AdminHome from './components/admin/admin-home/AdminHome';
+// import SignIn from './components/SignIn/SignIn';
+import { Route, HashRouter } from 'react-router-dom';
+import Home from './components/Home/Home';
+import Header from './components/Header/Header';
+import { FirebaseContext } from './components/Firebase';
 
 class App extends Component {
-  componentDidMount() {
-    axios
-      .get(
-        'https://www.googleapis.com/books/v1/volumes?q=isbn:' + this.state.isbn
-      )
-      .then(data => {
-        console.log(data);
-        this.setState({ book: data });
-      });
-  }
+  state = {};
 
-  state = {
-    isbn: 9781451648546,
-    book: null
-  };
   render() {
     return (
-      <div className={classes.App}>
-        <AdminHome />
-      </div>
+      <HashRouter>
+        <div>
+          <FirebaseContext.Consumer>
+            {firebase => <Header firebase={firebase} />}
+          </FirebaseContext.Consumer>
+
+          <Route exact path="/" component={Home} />
+          <Route path="/admin" component={AdminHome} />
+        </div>
+      </HashRouter>
     );
   }
 }
