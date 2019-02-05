@@ -1,0 +1,14 @@
+.Card {
+  max-width: 250px;
+}
+.Media {
+  height: 300px;
+}
+
+.Book {
+  display: none;
+}
+
+.Typography {
+  font-size: 1rem;
+}

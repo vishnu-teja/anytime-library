@@ -1,3 +1,11 @@
 .AdminHome {
   text-align: center;
 }
+
+.BookCard {
+  width: 200px;
+}
+
+.Modal {
+  padding-top: 300px;
+}

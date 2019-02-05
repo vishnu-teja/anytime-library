@@ -1,0 +1,16 @@
+.Modal {
+  background: white;
+  position: absolute;
+  outline: none;
+  top: 100;
+}
+
+.container {
+  display: 'flex';
+  flex-wrap: 'wrap';
+}
+
+.textField {
+  margin-left: 10px;
+  margin-right: 10px;
+}
