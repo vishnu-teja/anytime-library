@@ -9,7 +9,6 @@ import { FirebaseContext } from './components/Firebase';
 import { connect } from 'react-redux';
 import Book from './components/Book/Book';
 import UserHome from './components/user/UserHome/UserHome';
-import { Grid } from '@material-ui/core';
 import classes from './App.css';
 import * as routerConstants from './constants/routes';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
@@ -20,7 +19,7 @@ class App extends Component {
     return (
       <BrowserRouter>
         <MuiThemeProvider>
-          <Grid container className={classes.App}>
+          <div>
             <FirebaseContext.Consumer>
               {firebase => (
                 <div className={classes.Header}>
@@ -54,7 +53,7 @@ class App extends Component {
                 <Route path="/header" component={Header} />
               </Switch>
             </div>
-          </Grid>
+          </div>
         </MuiThemeProvider>
       </BrowserRouter>
     );

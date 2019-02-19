@@ -3,3 +3,8 @@
   width: 600px;
   height: 600px;
 }
+
+.Loader {
+  padding-left: 50vw;
+  padding-top: 40vh;
+}

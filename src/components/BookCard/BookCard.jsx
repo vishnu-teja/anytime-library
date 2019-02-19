@@ -6,7 +6,8 @@ import {
   CardContent,
   CardMedia,
   Button,
-  Typography
+  Typography,
+  Grid
 } from '@material-ui/core';
 
 import classes from './BookCard.css';
@@ -47,26 +48,39 @@ class BookCard extends Component {
           </Link>
           {this.props.isAdmin ? (
             <CardActions>
-              <Button
-                size="small"
-                color="primary"
-                onClick={() => this.editBookHandler(book)}
-              >
-                Edit
-              </Button>
-              {book.issuedTo && book.issuedTo.length ? (
-                <Button size="small" color="primary" disabled>
-                  Issued
-                </Button>
-              ) : (
-                <Button
-                  size="small"
-                  color="primary"
-                  onClick={() => this.deleteBookHandler(book.key)}
-                >
-                  Delete
-                </Button>
-              )}
+              <Grid container spacing={16} justify="center">
+                <Grid item>
+                  <Button
+                    size="small"
+                    color="primary"
+                    variant="outlined"
+                    onClick={() => this.editBookHandler(book)}
+                  >
+                    Edit
+                  </Button>
+                </Grid>
+                <Grid item>
+                  {book.issuedTo && book.issuedTo.length ? (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      color="primary"
+                      disabled
+                    >
+                      Issued
+                    </Button>
+                  ) : (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      color="secondary"
+                      onClick={() => this.deleteBookHandler(book.key)}
+                    >
+                      Delete
+                    </Button>
+                  )}
+                </Grid>
+              </Grid>
             </CardActions>
           ) : null}
         </Card>

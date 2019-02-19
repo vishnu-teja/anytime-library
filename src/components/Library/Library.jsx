@@ -7,7 +7,9 @@ import {
   ListItemText,
   ListItemSecondaryAction,
   Checkbox,
-  List
+  List,
+  CircularProgress,
+  Typography
 } from '@material-ui/core';
 import BookCard from './../BookCard/BookCard';
 import { connect } from 'react-redux';
@@ -17,18 +19,19 @@ import { ALL_BOOKS } from '../../store/actions';
 class Library extends Component {
   constructor(params) {
     super(params);
-
+    this.state = {
+      loading: true,
+      intialBooks: [],
+      filteredBooks: [],
+      books: [],
+      maxDays: 15,
+      maxBooks: 5,
+      categories: [],
+      selectedCategories: []
+    };
     this.searchRef = React.createRef();
   }
-  state = {
-    intialBooks: [],
-    filteredBooks: [],
-    books: [],
-    maxDays: 15,
-    maxBooks: 5,
-    categories: [],
-    selectedCategories: []
-  };
+
   componentWillMount() {
     this.setBooksHandler();
   }
@@ -57,7 +60,8 @@ class Library extends Component {
       intialBooks: books,
       books: books,
       filteredBooks: books,
-      categories: categories
+      categories: categories,
+      loading: false
     });
     this.props.onAddAllBooks(books);
   };
@@ -79,10 +83,9 @@ class Library extends Component {
       selectedCategories.push(category.toUpperCase());
     } else {
       selectedCategories.splice(
-        () =>
-          selectedCategories.findIndex(
-            cat => cat.category.toUpperCase() === category.toUpperCase()
-          ),
+        selectedCategories.findIndex(
+          cat => cat.toUpperCase() === category.toUpperCase()
+        ),
         1
       );
     }
@@ -110,68 +113,83 @@ class Library extends Component {
   render() {
     return (
       <div>
-        <Grid container justify="center">
-          <TextField
-            id="standard-search"
-            label="Search by Author or Title..."
-            type="search"
-            className={classes.textField}
-            margin="normal"
-            inputRef={this.searchRef}
-            onChange={this.searchBookHandler}
-          />
-        </Grid>
-
-        <Grid container spacing={16} className={classes.Books}>
-          <Grid item xl={2}>
-            <List dense className={classes.root}>
-              {this.state.categories.map((category, i) => {
-                return (
-                  <Grid key={category} item>
-                    <ListItem>
-                      <ListItemText primary={category.toUpperCase()} />
-                      <ListItemSecondaryAction>
-                        <Checkbox
-                          onChange={() => this.filterToggle(category)}
-                          // checked={this.state.checked.indexOf(value) !== -1}
-                        />
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  </Grid>
-                );
-              })}
-            </List>
-          </Grid>
-
-          <Grid item xl={10}>
-            <Grid container justify="center" spacing={16}>
-              {this.state.books.length ? (
-                this.state.books.map(book => {
-                  return (
-                    <Grid
-                      key={book.key}
-                      item
-                      xl={2}
-                      className={classes.BookCard}
-                    >
-                      <BookCard
-                        // key={book.key}
-                        delete={key => this.deleteBookHandler(key)}
-                        book={book}
-                        isAdmin={this.props.store.user.isAdmin}
-                        editBook={book => this.editBookHandler(book)}
-                      />
-                    </Grid>
-                  );
-                })
-              ) : (
-                <div>
-                  <h1>No Results</h1>
-                </div>
-              )}
+        {this.state.loading ? (
+          <div className={classes.Loader}>
+            <CircularProgress disableShrink />
+          </div>
+        ) : (
+          <div>
+            <Grid container justify="center">
+              <TextField
+                id="standard-search"
+                label="Search by Author or Title..."
+                type="search"
+                className={classes.textField}
+                margin="normal"
+                inputRef={this.searchRef}
+                onChange={this.searchBookHandler}
+              />
             </Grid>
-          </Grid>
-        </Grid>
+
+            <Grid
+              container
+              justify="center"
+              spacing={16}
+              className={classes.Books}
+            >
+              <Grid item xs={2}>
+                <List dense className={classes.root}>
+                  <Typography variant="title">Filter</Typography>
+
+                  {this.state.categories.map((category, i) => {
+                    return (
+                      <Grid key={category} item>
+                        <ListItem>
+                          <ListItemText primary={category.toUpperCase()} />
+                          <ListItemSecondaryAction>
+                            <Checkbox
+                              onChange={() => this.filterToggle(category)}
+                              // checked={this.state.checked.indexOf(value) !== -1}
+                            />
+                          </ListItemSecondaryAction>
+                        </ListItem>
+                      </Grid>
+                    );
+                  })}
+                </List>
+              </Grid>
+
+              <Grid item xs={9}>
+                <Grid
+                  container
+                  alignItems="stretch"
+                  justify="center"
+                  spacing={16}
+                >
+                  {this.state.books.length ? (
+                    this.state.books.map(book => {
+                      return (
+                        <Grid key={book.key} item className={classes.BookCard}>
+                          <BookCard
+                            // key={book.key}
+                            delete={key => this.deleteBookHandler(key)}
+                            book={book}
+                            isAdmin={this.props.store.user.isAdmin}
+                            editBook={book => this.editBookHandler(book)}
+                          />
+                        </Grid>
+                      );
+                    })
+                  ) : (
+                    <div>
+                      <h1>No Results</h1>
+                    </div>
+                  )}
+                </Grid>
+              </Grid>
+            </Grid>
+          </div>
+        )}
       </div>
     );
   }

@@ -12,6 +12,7 @@ import { ADD_USER } from './../../store/actions';
 import { connect } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 import * as routerTypes from '../../constants/routes';
+import { Grid } from '@material-ui/core';
 class Header extends Component {
   constructor(props) {
     super(props);
@@ -82,19 +83,19 @@ class Header extends Component {
   };
 
   setUserDataHandler = obj => {
-    this.setState({ error: null });
     this.props.onAddUser(obj);
-    if (this.props.store.user.email && !this.state.user)
-      this.setState({ user: this.props.store.user, login: true });
+    if (this.props.store.user.email)
+      this.setState({ error: null, user: this.props.store.user, login: true });
     sessionStorage.setItem('user', JSON.stringify(obj));
+    this.setState({ login: false });
   };
 
   closeMenuHandler = () => {
-    this.setState({ openMenu: false });
+    this.setState({ anchorEl: null });
   };
 
-  openMenuHandler = () => {
-    this.setState({ openMenu: true });
+  openMenuHandler = event => {
+    this.setState({ anchorEl: event.currentTarget });
   };
   signOutHandler = () => {
     this.props.firebase.doSignOut();
@@ -102,17 +103,27 @@ class Header extends Component {
     sessionStorage.clear();
     this.setState({ user: null, login: false });
   };
+
+  manageuserHandler = () => {
+    const obj = { ...this.state.user, isAdmin: !this.state.user.isAdmin };
+    this.setUserDataHandler(obj);
+    console.log(this.state.user);
+    this.setState({ user: obj });
+    this.closeMenuHandler();
+  };
   render() {
-    console.log(this.props);
+    const { user } = this.state;
     return (
       <div className={classes.root}>
-        {this.state.user ? (
-          this.state.user.isAdmin ? (
-            this.props.location.pathname !== routerTypes.ADMIN ? (
-              <Redirect to={routerTypes.ADMIN} />
+        {user ? (
+          this.state.login ? (
+            user.isAdmin ? (
+              this.props.location.pathname !== routerTypes.ADMIN ? (
+                <Redirect to={routerTypes.ADMIN} />
+              ) : null
+            ) : this.props.location.pathname !== routerTypes.USER ? (
+              <Redirect to={routerTypes.USER} />
             ) : null
-          ) : this.props.location.pathname !== routerTypes.USER ? (
-            <Redirect to={routerTypes.USER} />
           ) : null
         ) : this.props.location.pathname !== routerTypes.HOME ? (
           <Redirect exact to={routerTypes.HOME} />
@@ -130,19 +141,28 @@ class Header extends Component {
 
             {this.state.user ? (
               <div>
-                <Avatar
-                  src={this.state.user.image}
-                  onClick={this.openMenuHandler}
-                  className={classes.Avatar}
-                  aria-haspopup="true"
-                  aria-owns={this.state.anchorEl ? 'simple-menu' : undefined}
-                />
+                <Grid container spacing={16}>
+                  <Button
+                    onClick={this.openMenuHandler}
+                    color="inherit"
+                    aria-haspopup="true"
+                    aria-owns={this.state.anchorEl ? 'simple-menu' : undefined}
+                  >
+                    {user.name}
+                  </Button>
+                  <Avatar src={user.image} className={classes.Avatar} />
+                </Grid>
                 <Menu
                   id="simple-menu"
                   anchorEl={this.state.anchorEl}
-                  open={this.state.openMenu}
+                  open={Boolean(this.state.anchorEl)}
                   onClose={this.closeMenuHandler}
                 >
+                  <MenuItem onClick={this.manageuserHandler}>
+                    {' '}
+                    {user.isAdmin ? 'Change to User' : 'Change to Admin'}
+                  </MenuItem>
+
                   <MenuItem onClick={this.signOutHandler}>SignOut</MenuItem>
                 </Menu>
               </div>
@@ -159,7 +179,6 @@ class Header extends Component {
 }
 
 const mapStateToProps = state => {
-  console.log(state);
   return {
     store: state
   };

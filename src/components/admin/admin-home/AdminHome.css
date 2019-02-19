@@ -1,5 +1,6 @@
 .AdminHome {
   text-align: center;
+  min-width: 100%;
 }
 
 .BookCard {
@@ -8,4 +9,17 @@
 
 .Modal {
   padding-top: 300px;
+}
+
+.AddNew {
+  margin-top: 100px;
+}
+
+.IssuedBooks {
+  padding-top: 50px;
+}
+
+.Loader {
+  padding-left: 50vw;
+  padding-top: 40vh;
 }

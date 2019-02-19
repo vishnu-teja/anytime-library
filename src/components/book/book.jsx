@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { Grid, Button, Avatar } from '@material-ui/core';
+import { Grid, Button, Avatar, CircularProgress } from '@material-ui/core';
 import { connect } from 'react-redux';
 import { ISSUE_BOOK, RETURN_BOOK } from '../../store/actions';
 import SnackBar from './../snackbar/snackbar';
 import { Link } from 'react-router-dom';
 import { Rating } from 'material-ui-rating';
 import * as routerTypes from './../../constants/routes';
-// import classes from './Book.css';
+import classes from './Book.css';
 class Book extends Component {
   constructor(params) {
     super(params);
@@ -18,7 +18,8 @@ class Book extends Component {
     open: false,
     message: '',
     disableAddReview: false,
-    addedReview: false
+    addedReview: false,
+    loading: true
   };
   componentDidMount() {
     const key = this.props.match.params.id;
@@ -28,11 +29,12 @@ class Book extends Component {
       )
       .then(res => {
         console.log(res);
-        if (res.data) this.setState({ book: res.data });
+        if (res.data) this.setState({ book: res.data, loading: false });
       });
   }
 
   issueBookHandler = () => {
+    this.setState({ loading: true });
     const books = this.props.store.user.books
       ? [...this.props.store.user.books]
       : [];
@@ -46,14 +48,13 @@ class Book extends Component {
   };
 
   returnBookHandler = () => {
+    this.setState({ loading: true });
     const books = this.props.store.user.books
       ? [...this.props.store.user.books]
       : [];
     const issuedBook = books.find(bk => bk.isbn === this.state.book.isbn);
     const book = { ...issuedBook, returnDate: new Date() };
-    books.splice(bk => {
-      return books.findIndex(indx => indx.isbn === issuedBook.isbn);
-    }, 1);
+    books.splice(books.findIndex(indx => indx.isbn === issuedBook.isbn), 1);
     const history = this.props.store.user.history
       ? [...this.props.store.user.history]
       : [];
@@ -79,7 +80,11 @@ class Book extends Component {
       .then(res => {
         console.log(res);
         this.props.onBookIssue(user);
-        this.setState({ open: true, message: action + ' successfully!' });
+        this.setState({
+          open: true,
+          message: action + ' successfully!',
+          loading: false
+        });
         sessionStorage.setItem('user', JSON.stringify(user));
       });
   };
@@ -181,76 +186,123 @@ class Book extends Component {
     console.log(book, user);
     return (
       <div>
-        <div>
-          <Link to={routerTypes.USER}>back</Link>
-        </div>
-        {book ? (
-          <div>
-            {this.state.open ? (
-              <SnackBar
-                open={this.state.open}
-                message={this.state.message}
-                close={close => this.closeHandler(close)}
-              />
-            ) : null}
-            <Grid container spacing={24} justify="center">
-              <Grid item xl={4}>
-                <div>
-                  <img src={book.largeImage} alt={book.title} />
-                  {issuedBook ? (
-                    <div>
-                      <p>Due Date: {dueDate.toLocaleDateString('en-US')}</p>
-                      <Button onClick={this.returnBookHandler}>Return</Button>
-                    </div>
-                  ) : (
-                    <Button onClick={this.issueBookHandler}>Issue</Button>
-                  )}
-                </div>
-              </Grid>
-              <Grid item xl={6}>
-                <h1>{book.title}</h1>
-                <h3>Rating:{book.rating}</h3>{' '}
-                <Rating
-                  value={userRating ? userRating.rating : 0}
-                  max={5}
-                  onChange={value => this.ratingHandler(value)}
-                />
-                <p>Description: {book.description}</p>
-                {book.reviews && book.reviews.find(b => b.id === user.id) ? (
-                  <div />
-                ) : (
-                  <div>
-                    <p>Add a review: </p>
-
-                    <textarea
-                      ref={this.textAreaRef}
-                      cols="30"
-                      rows="10"
-                      onChange={this.enableAddButton}
-                    />
-                    <button onClick={this.reviewAddHandler}>Add</button>
-                  </div>
-                )}
-              </Grid>
-
-              <p>Reviews: </p>
-              {book.reviews ? (
-                book.reviews.map(review => {
-                  return (
-                    <div key={review.user}>
-                      <Avatar src={review.image} />
-                      <h4>{review.user}</h4>
-                      <br />
-                      <p>{review.review}</p>
-                    </div>
-                  );
-                })
-              ) : (
-                <div />
-              )}
-            </Grid>
+        {this.state.loading ? (
+          <div className={classes.Loader}>
+            <CircularProgress disableShrink />
           </div>
-        ) : null}
+        ) : (
+          <div>
+            <div>
+              <Link to={routerTypes.USER}>back</Link>
+            </div>
+            {book ? (
+              <div>
+                {this.state.open ? (
+                  <SnackBar
+                    open={this.state.open}
+                    message={this.state.message}
+                    close={close => this.closeHandler(close)}
+                  />
+                ) : null}
+                <Grid container justify="center">
+                  <Grid item xs={2}>
+                    <Grid container direction="column" justify="center">
+                      <Grid item xs={6}>
+                        <img src={book.largeImage} alt={book.title} />
+                      </Grid>
+                      {issuedBook ? (
+                        <div>
+                          <p>Due Date: {dueDate.toLocaleDateString('en-US')}</p>
+                          <Button
+                            variant="outlined"
+                            color="secondary"
+                            onClick={this.returnBookHandler}
+                          >
+                            Return
+                          </Button>
+                        </div>
+                      ) : (
+                        <div>
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={this.issueBookHandler}
+                          >
+                            Issue
+                          </Button>
+                        </div>
+                      )}
+                    </Grid>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <h1>{book.title}</h1>
+                    <h3>Avg. Rating: {book.rating}</h3>{' '}
+                    <Rating
+                      value={userRating ? userRating.rating : 0}
+                      max={5}
+                      onChange={value => this.ratingHandler(value)}
+                    />
+                    <p className={classes.WrapContent}>
+                      <b>Description:</b> {book.description}
+                    </p>
+                    {book.reviews &&
+                    book.reviews.find(b => b.id === user.id) ? (
+                      <div />
+                    ) : (
+                      <Grid container direction="column" spacing={16}>
+                        <Grid item>
+                          <p>
+                            <b>Add a review:</b>{' '}
+                          </p>
+
+                          <textarea
+                            ref={this.textAreaRef}
+                            cols="100"
+                            rows="5"
+                            onChange={this.enableAddButton}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={this.reviewAddHandler}
+                          >
+                            Add
+                          </Button>
+                        </Grid>
+                      </Grid>
+                    )}
+                    <h3>Reviews: </h3>
+                    {book.reviews ? (
+                      book.reviews.map(review => {
+                        return (
+                          <div key={review.user}>
+                            <Grid
+                              container
+                              justify="flex-start"
+                              alignItems="stretch"
+                            >
+                              <Grid item xs={1} className={classes.UserIcon}>
+                                <Avatar src={review.image} />
+                              </Grid>
+                              <Grid item xs={11}>
+                                <h4>{review.user}</h4>
+                                <p>{review.review}</p>
+                              </Grid>
+                            </Grid>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div />
+                    )}
+                  </Grid>
+                </Grid>
+              </div>
+            ) : null}
+          </div>
+        )}
       </div>
     );
   }

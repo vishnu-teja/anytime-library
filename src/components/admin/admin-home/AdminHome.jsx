@@ -6,7 +6,9 @@ import {
   Modal,
   Tab,
   Tabs,
-  AppBar
+  AppBar,
+  Typography,
+  CircularProgress
 } from '@material-ui/core';
 import axios from 'axios';
 import SnackBar from '../../snackbar/snackbar';
@@ -34,7 +36,8 @@ class AdminHome extends Component {
     disableAddButton: true,
     openEdit: false,
     editedBook: {},
-    value: 0
+    value: 0,
+    loading: true
   };
 
   componentDidMount() {
@@ -56,7 +59,7 @@ class AdminHome extends Component {
       .get('https://anytime-library-cf928.firebaseio.com/books.json')
       .then(data => {
         if (data && data.data && Object.values(data.data).length) {
-          this.setState({ books: data.data, openEdit: false });
+          this.setState({ books: data.data, openEdit: false, loading: false });
         }
       });
   };
@@ -109,7 +112,7 @@ class AdminHome extends Component {
         this.setState({ open: true, message: 'This book already exists.' });
       } else {
         // books.push(obj);
-        this.setState({ newBook: obj });
+        this.setState({ newBook: obj, loading: true });
         this.addBookHandler(this.state.newBook);
       }
     }
@@ -131,6 +134,7 @@ class AdminHome extends Component {
   };
 
   deleteBookHandler = key => {
+    this.setState({ loading: true });
     axios
       .delete(
         'https://anytime-library-cf928.firebaseio.com/books/' + key + '.json'
@@ -149,12 +153,11 @@ class AdminHome extends Component {
     this.setState({ editedBook: book, openEdit: true });
   };
 
-  closeEditHandler = () => {
-    // this.setState({ openEdit: false });
+  closePopupHandler = data => {
+    this.setState({ openEdit: data });
   };
 
   updatedBookHandler = book => {
-    console.log(book);
     axios
       .put(
         'https://anytime-library-cf928.firebaseio.com/books/' +
@@ -172,38 +175,35 @@ class AdminHome extends Component {
     const { value } = this.state;
     return (
       <div>
-        <Modal
-          open={this.state.openEdit}
-          aria-labelledby="simple-modal-title"
-          aria-describedby="simple-modal-description"
-          className={classes.Modal}
-        >
-          <EditBook
-            open={this.state.openEdit}
-            book={this.state.editedBook}
-            handleChange={data => this.updatedBookHandler(data)}
-          />
-        </Modal>
-        <Grid
-          container
-          spacing={16}
-          className={classes.AdminHome}
-          onClick={this.closeEditHandler}
-        >
-          {this.state.open ? (
-            <SnackBar
-              open={this.state.open}
-              message={this.state.message}
-              close={close => this.closeHandler(close)}
-            />
-          ) : null}
-
-          <Grid container>
-            <AppBar
-              position="static"
-              color="default"
-              className={classes.AppBar}
+        {this.state.loading ? (
+          <div className={classes.Loader}>
+            <CircularProgress disableShrink />
+          </div>
+        ) : (
+          <div>
+            <Modal
+              open={this.state.openEdit}
+              aria-labelledby="simple-modal-title"
+              aria-describedby="simple-modal-description"
+              className={classes.Modal}
             >
+              <EditBook
+                open={this.state.openEdit}
+                book={this.state.editedBook}
+                handleChange={data => this.updatedBookHandler(data)}
+                closePopup={data => this.closePopupHandler(data)}
+              />
+            </Modal>
+
+            {this.state.open ? (
+              <SnackBar
+                open={this.state.open}
+                message={this.state.message}
+                close={close => this.closeHandler(close)}
+              />
+            ) : null}
+
+            <AppBar position="static" color="default">
               <Tabs
                 value={value}
                 onChange={this.handleChange}
@@ -218,64 +218,74 @@ class AdminHome extends Component {
             </AppBar>
             {value === 0 && (
               <div>
-                <Grid item xs={12}>
-                  <Input
-                    type="text"
-                    inputRef={this.inputRef}
-                    placeholder="Enter ISBN..."
-                    onChange={this.enableAddButton}
-                  />
-                  <br />
-                  <br />
-                  <Button
-                    variant="contained"
-                    onClick={() => this.getBooksHandler()}
-                    color="primary"
-                    disabled={this.state.disableAddButton}
-                  >
-                    Add Book
-                  </Button>
-                </Grid>
+                <Grid container justify="center">
+                  <Grid item xs={10}>
+                    {/*         */}
 
-                <Grid container spacing={16} justify="center">
-                  {/*         */}
-
-                  <Library
-                    delete={key => this.deleteBookHandler(key)}
-                    editBook={book => this.editBookHandler(book)}
-                  />
+                    <Library
+                      delete={key => this.deleteBookHandler(key)}
+                      editBook={book => this.editBookHandler(book)}
+                    />
+                  </Grid>
+                  <Grid item xs={2}>
+                    <div className={classes.AddNew}>
+                      <Typography variant="title">Add New Book</Typography>
+                      <Input
+                        type="text"
+                        inputRef={this.inputRef}
+                        placeholder="Enter ISBN..."
+                        onChange={this.enableAddButton}
+                      />
+                      <br />
+                      <br />
+                      <Button
+                        variant="contained"
+                        onClick={() => this.getBooksHandler()}
+                        color="primary"
+                        disabled={this.state.disableAddButton}
+                      >
+                        Add Book
+                      </Button>
+                    </div>
+                  </Grid>
                 </Grid>
               </div>
             )}
             {value === 1 && (
               <div>
-                {books.length ? (
-                  books
-                    .filter(bk => bk.issuedTo && bk.issuedTo.length)
-                    .map(book => {
-                      return (
-                        <Grid
-                          key={book.key}
-                          item
-                          xl={4}
-                          className={classes.BookCard}
-                        >
-                          <BookCard
-                            book={book}
-                            delete={key => this.deleteBookHandler(key)}
-                            isAdmin={this.state.isAdmin}
-                            editBook={book => this.editBookHandler(book)}
-                          />
-                        </Grid>
-                      );
-                    })
-                ) : (
-                  <div />
-                )}
+                <Grid
+                  container
+                  spacing={16}
+                  justify="center"
+                  className={classes.IssuedBooks}
+                >
+                  {books.length ? (
+                    books
+                      .filter(bk => bk.issuedTo && bk.issuedTo.length)
+                      .map(book => {
+                        return (
+                          <Grid
+                            key={book.key}
+                            item
+                            className={classes.BookCard}
+                          >
+                            <BookCard
+                              book={book}
+                              delete={key => this.deleteBookHandler(key)}
+                              isAdmin={this.state.isAdmin}
+                              editBook={book => this.editBookHandler(book)}
+                            />
+                          </Grid>
+                        );
+                      })
+                  ) : (
+                    <div />
+                  )}
+                </Grid>
               </div>
             )}
-          </Grid>
-        </Grid>
+          </div>
+        )}
       </div>
     );
   }

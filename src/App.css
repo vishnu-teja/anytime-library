@@ -3,7 +3,8 @@
 }
 
 .Body {
-  padding-top: 64px;
+  padding-top: 62px;
+  position: absolute;
   width: 100%;
 }
 

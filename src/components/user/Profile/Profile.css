@@ -1,0 +1,11 @@
+.Image {
+  width: 215px;
+  border-radius: 50%;
+}
+
+.Container {
+  padding-top: 50px;
+}
+.BookCard {
+  width: 200px;
+}
