@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import {
   Button,
-  Input,
+  // Input,
   Grid,
   Modal,
   Tab,
   Tabs,
   AppBar,
-  Typography,
+  // Typography,
   CircularProgress
 } from '@material-ui/core';
 import axios from 'axios';
@@ -21,13 +21,8 @@ import EditBook from '../EditBook/EditBook';
 import BookCard from '../../BookCard/BookCard';
 
 class AdminHome extends Component {
-  constructor(props) {
-    super(props);
-
-    this.inputRef = React.createRef();
-  }
   state = {
-    isbn: 0,
+    // bookKey: 0,
     books: {},
     newBook: null,
     isAdmin: true,
@@ -37,18 +32,19 @@ class AdminHome extends Component {
     openEdit: false,
     editedBook: {},
     value: 0,
-    loading: true
+    loading: true,
+    type: null
   };
 
   componentDidMount() {
     this.setBooksHandler();
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.isbn !== prevState.isbn) {
-      this.setBooksHandler();
-    }
-  }
+  // componentDidUpdate(prevProps, prevState) {
+  //   if (this.state.bookKey !== prevState.bookKey) {
+  //     this.setBooksHandler();
+  //   }
+  // }
 
   handleChange = (event, value) => {
     this.setState({ value: value });
@@ -60,18 +56,16 @@ class AdminHome extends Component {
       .then(data => {
         if (data && data.data && Object.values(data.data).length) {
           this.setState({ books: data.data, openEdit: false, loading: false });
+        } else {
+          this.setState({ loading: false });
         }
       });
   };
 
-  getBooksHandler = () => {
+  getBooksHandler = isbn => {
     axios
-      .get(
-        'https://www.googleapis.com/books/v1/volumes?q=isbn:' +
-          this.inputRef.current.value
-      )
+      .get('https://www.googleapis.com/books/v1/volumes?q=isbn:' + isbn)
       .then(res => {
-        this.inputRef.current.value = null;
         this.setState({ disableAddButton: true });
         this.createBookHandler(res);
       });
@@ -83,7 +77,6 @@ class AdminHome extends Component {
         open: true,
         message: 'Please enter a valid ISBN number.'
       });
-      this.inputRef.current.focus();
       this.setState({ disableAddButton: true });
     } else {
       const bookInfo =
@@ -97,7 +90,9 @@ class AdminHome extends Component {
         rating: bookInfo.averageRating,
         category: bookInfo.categories[0],
         description: bookInfo.description,
-        smallImage: bookInfo.imageLinks.smallThumbnail,
+        smallImage: bookInfo.imageLinks.smallThumbnail
+          ? bookInfo.imageLinks.smallThumbnail
+          : null,
         largeImage: bookInfo.imageLinks.thumbnail,
         ratingsCount: bookInfo.ratingsCount,
         isbn: bookInfo.industryIdentifiers[0].identifier,
@@ -105,9 +100,11 @@ class AdminHome extends Component {
         reviews: []
       };
 
-      const isbn = obj.isbn;
+      const title = obj.title;
       const books = { ...this.state.books };
-      const existingBook = Object.values(books).find(boo => boo.isbn === isbn);
+      const existingBook = Object.values(books).find(
+        boo => boo.title === title
+      );
       if (existingBook) {
         this.setState({ open: true, message: 'This book already exists.' });
       } else {
@@ -118,12 +115,20 @@ class AdminHome extends Component {
     }
   };
 
-  addBookHandler = () => {
+  addNewBookHandler = () => {
+    const book = {
+      title: '',
+      author: '',
+      category: '',
+      description: '',
+      largeImage: 'https://www.classicposters.com/images/nopicture.gif',
+      copies: ''
+    };
+    this.setState({ editedBook: book, openEdit: true, type: 'add' });
+  };
+  addBookHandler = book => {
     axios
-      .post(
-        'https://anytime-library-cf928.firebaseio.com/books.json',
-        this.state.newBook
-      )
+      .post('https://anytime-library-cf928.firebaseio.com/books.json', book)
       .then(res => {
         this.setBooksHandler();
       });
@@ -150,24 +155,29 @@ class AdminHome extends Component {
   };
 
   editBookHandler = book => {
-    this.setState({ editedBook: book, openEdit: true });
+    this.setState({ editedBook: book, openEdit: true, type: 'edit' });
   };
 
   closePopupHandler = data => {
     this.setState({ openEdit: data });
   };
 
-  updatedBookHandler = book => {
-    axios
-      .put(
-        'https://anytime-library-cf928.firebaseio.com/books/' +
-          book.key +
-          '.json',
-        book
-      )
-      .then(res => {
-        this.setBooksHandler();
-      });
+  updatedBookHandler = (book, type) => {
+    if (type === 'edit') {
+      axios
+        .put(
+          'https://anytime-library-cf928.firebaseio.com/books/' +
+            book.key +
+            '.json',
+          book
+        )
+        .then(res => {
+          this.setBooksHandler();
+        });
+    } else if (type === 'add') {
+      this.setState({ newBook: book, loading: true });
+      this.addBookHandler(book);
+    }
   };
 
   render() {
@@ -190,7 +200,11 @@ class AdminHome extends Component {
               <EditBook
                 open={this.state.openEdit}
                 book={this.state.editedBook}
-                handleChange={data => this.updatedBookHandler(data)}
+                type={this.state.type}
+                handleChange={(data, type) =>
+                  this.updatedBookHandler(data, type)
+                }
+                addIsbn={isbn => this.getBooksHandler(isbn)}
                 closePopup={data => this.closePopupHandler(data)}
               />
             </Modal>
@@ -218,6 +232,15 @@ class AdminHome extends Component {
             </AppBar>
             {value === 0 && (
               <div>
+                <Grid container justify="center" alignContent="space-around">
+                  <Button
+                    color="primary"
+                    variant="contained"
+                    onClick={this.addNewBookHandler}
+                  >
+                    Add Book
+                  </Button>
+                </Grid>
                 <Grid container justify="center">
                   <Grid item xs={10}>
                     {/*         */}
@@ -226,27 +249,6 @@ class AdminHome extends Component {
                       delete={key => this.deleteBookHandler(key)}
                       editBook={book => this.editBookHandler(book)}
                     />
-                  </Grid>
-                  <Grid item xs={2}>
-                    <div className={classes.AddNew}>
-                      <Typography variant="title">Add New Book</Typography>
-                      <Input
-                        type="text"
-                        inputRef={this.inputRef}
-                        placeholder="Enter ISBN..."
-                        onChange={this.enableAddButton}
-                      />
-                      <br />
-                      <br />
-                      <Button
-                        variant="contained"
-                        onClick={() => this.getBooksHandler()}
-                        color="primary"
-                        disabled={this.state.disableAddButton}
-                      >
-                        Add Book
-                      </Button>
-                    </div>
                   </Grid>
                 </Grid>
               </div>

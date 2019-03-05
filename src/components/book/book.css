@@ -1,5 +1,5 @@
 .UserIcon {
-  padding-top: 13px;
+  margin-top: 13px;
 }
 
 .WrapContent {
@@ -9,4 +9,14 @@
 .Loader {
   padding-left: 50vw;
   padding-top: 40vh;
+}
+
+.TextArea {
+  width: 100%;
+  height: 100px;
+}
+
+.Img {
+  width: 200px;
+  border: 1px solid;
 }

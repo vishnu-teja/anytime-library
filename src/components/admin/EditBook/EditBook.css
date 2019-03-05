@@ -3,6 +3,7 @@
   position: absolute;
   outline: none;
   top: 100;
+  padding: 20px;
 }
 
 .container {
@@ -13,4 +14,8 @@
 .textField {
   margin-left: 10px;
   margin-right: 10px;
+}
+
+.BookImage {
+  width: 150px;
 }

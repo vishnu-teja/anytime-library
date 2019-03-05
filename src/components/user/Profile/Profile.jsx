@@ -4,20 +4,23 @@ import classes from './Profile.css';
 import BookCard from './../../BookCard/BookCard';
 
 const Profile = props => {
-  console.log(props);
   return (
     <div>
       <Grid
         container
-        spacing={16}
+        spacing={24}
         className={classes.Container}
         justify="center"
       >
-        <Grid item xs={2}>
+        <Grid item>
           <Grid container direction="column">
             <img
               className={classes.Image}
-              src={props.user.image}
+              src={
+                props.user.image
+                  ? props.user.image
+                  : 'https://www.qualiscare.com/wp-content/uploads/2017/08/default-user-300x300.png'
+              }
               alt={props.user.name}
             />
             <h3>Name: {props.user.name}</h3>
@@ -36,7 +39,11 @@ const Profile = props => {
                   .map((book, index) => {
                     if (index < 5) {
                       return (
-                        <Grid key={book.isbn} item className={classes.BookCard}>
+                        <Grid
+                          key={book.title}
+                          item
+                          className={classes.BookCard}
+                        >
                           <BookCard book={book} isAdmin={props.user.isAdmin} />
                         </Grid>
                       );
@@ -45,9 +52,7 @@ const Profile = props => {
                   })
               ) : (
                 <Grid container direction="column" spacing={16}>
-                  <p>
-                    <h5>Please select a favorite cateogry: </h5>
-                  </p>
+                  <h5>Please select a favorite cateogry: </h5>
                   <Grid container spacing={16}>
                     {props.books ? (
                       [
@@ -83,10 +88,10 @@ const Profile = props => {
             <b>My Books: </b>
           </p>
           <Grid container alignItems="stretch" spacing={16}>
-            {props.user.books.length ? (
+            {props.user.books && props.user.books.length ? (
               props.user.books.map(book => {
                 return (
-                  <Grid key={book.isbn} item className={classes.BookCard}>
+                  <Grid key={book.title} item className={classes.BookCard}>
                     <BookCard book={book} isAdmin={props.user.isAdmin} />
                     <p>
                       Issued On:{' '}

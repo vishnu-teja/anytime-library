@@ -16,8 +16,8 @@ import { Link } from 'react-router-dom';
 class BookCard extends Component {
   state = {};
 
-  deleteBookHandler = isbn => {
-    this.props.delete(isbn);
+  deleteBookHandler = key => {
+    this.props.delete(key);
   };
 
   editBookHandler = book => {
@@ -33,6 +33,7 @@ class BookCard extends Component {
               <CardMedia
                 className={classes.Media}
                 image={book.largeImage}
+                alt={book.title}
                 // title={book.title}
               />
               <CardContent>

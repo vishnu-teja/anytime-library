@@ -24,7 +24,6 @@ class UserHome extends Component {
         user
       )
       .then(res => {
-        console.log(res);
         this.props.onAddFavorite(user);
 
         this.setState({ open: true, message: 'Favorite added successfully!' });

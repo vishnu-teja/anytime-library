@@ -33,6 +33,7 @@
     "html-webpack-plugin": "2.29.0",
     "install": "^0.12.2",
     "jest": "20.0.4",
+    "jquery": "^3.3.1",
     "material-ui": "^0.20.2",
     "material-ui-rating": "^2.0.0",
     "npm": "^6.5.0",

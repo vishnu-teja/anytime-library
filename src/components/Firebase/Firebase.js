@@ -29,6 +29,8 @@ class FireBase {
   doPasswordUpdate = password => this.auth.currentUser.updatePassword(password);
 
   doSignInWithGoogle = () => this.auth.signInWithPopup(this.googleProvider);
+
+  getRedirectResult = () => this.auth.getRedirectResult();
 }
 
 export default FireBase;

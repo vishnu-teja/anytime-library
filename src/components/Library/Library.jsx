@@ -137,26 +137,28 @@ class Library extends Component {
               spacing={16}
               className={classes.Books}
             >
-              <Grid item xs={2}>
-                <List dense className={classes.root}>
-                  <Typography variant="title">Filter</Typography>
+              <Grid item>
+                <Grid container>
+                  <List dense className={classes.root}>
+                    <Typography variant="title">Filter</Typography>
 
-                  {this.state.categories.map((category, i) => {
-                    return (
-                      <Grid key={category} item>
-                        <ListItem>
-                          <ListItemText primary={category.toUpperCase()} />
-                          <ListItemSecondaryAction>
-                            <Checkbox
-                              onChange={() => this.filterToggle(category)}
-                              // checked={this.state.checked.indexOf(value) !== -1}
-                            />
-                          </ListItemSecondaryAction>
-                        </ListItem>
-                      </Grid>
-                    );
-                  })}
-                </List>
+                    {this.state.categories.map((category, i) => {
+                      return (
+                        <Grid key={category} item>
+                          <ListItem>
+                            <ListItemText primary={category.toUpperCase()} />
+                            <ListItemSecondaryAction>
+                              <Checkbox
+                                onChange={() => this.filterToggle(category)}
+                                // checked={this.state.checked.indexOf(value) !== -1}
+                              />
+                            </ListItemSecondaryAction>
+                          </ListItem>
+                        </Grid>
+                      );
+                    })}
+                  </List>
+                </Grid>
               </Grid>
 
               <Grid item xs={9}>

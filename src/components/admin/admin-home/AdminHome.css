@@ -8,7 +8,8 @@
 }
 
 .Modal {
-  padding-top: 300px;
+  padding-top: 30vh;
+  overflow-y: scroll;
 }
 
 .AddNew {
